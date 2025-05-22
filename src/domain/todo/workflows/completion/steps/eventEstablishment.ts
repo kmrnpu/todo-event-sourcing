@@ -11,9 +11,10 @@ export const establishEvent: EstablishEvent = (state) =>
       id: state.todo.id,
     },
     occuredAt: state.todo.completedAt,
-  })
-  .andThen(event => ok({
-    state: "eventEstablished" as const,
-    todo: state.todo,
-    event,
-  }))
+  }).andThen((event) =>
+    ok({
+      state: "eventEstablished" as const,
+      todo: state.todo,
+      event,
+    }),
+  );

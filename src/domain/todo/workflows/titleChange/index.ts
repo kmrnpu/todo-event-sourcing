@@ -10,15 +10,17 @@ import { establishEvent } from "./steps/eventEstablishment";
 type Context = {
   getTodo: GetTodo;
   pubishEvent: PublishEvent;
-}
+};
 
-export const changeTodoTitleWorkflow = (ctx: Context): ChangeTodoTitleWorkflow => (command) => 
-  ok(command)
-  .andThen(validate)
-  .asyncAndThen(identifyTarget(ctx.getTodo))
-  .andThen(changeTitle)
-  .andThen(establishEvent)
-  .andThen(({event}) => {
-    ctx.pubishEvent(event)
-    return ok()
-  })
+export const changeTodoTitleWorkflow =
+  (ctx: Context): ChangeTodoTitleWorkflow =>
+  (command) =>
+    ok(command)
+      .andThen(validate)
+      .asyncAndThen(identifyTarget(ctx.getTodo))
+      .andThen(changeTitle)
+      .andThen(establishEvent)
+      .andThen(({ event }) => {
+        ctx.pubishEvent(event);
+        return ok();
+      });

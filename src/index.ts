@@ -1,84 +1,88 @@
-import Fastify from 'fastify'
+import Fastify from "fastify";
 import { CreateTodoCommand } from "./domain/todo/workflows/creation/types";
 import { TodoChangeTitleCommand } from "./domain/todo/workflows/titleChange/types";
 import { PrismaClient } from "@prisma/client";
 import { getAllTodos, getTodo } from "./infrastructures/prismaTodoRepository";
 import { TodoId } from "./domain/todo/models/common";
 import { createTodoWorkflow } from "./domain/todo/workflows/creation";
-import { publishEvent, subscribeEvent } from "./domain/events/index"
-import { storeEvent } from "./infrastructures/prismaEventStore"
+import { publishEvent, subscribeEvent } from "./domain/events/index";
+import { storeEvent } from "./infrastructures/prismaEventStore";
 import { completeTodoWorkflow } from "./domain/todo/workflows/completion/index";
 import { changeTodoTitleWorkflow } from "./domain/todo/workflows/titleChange/index";
 
-const prisma = new PrismaClient()
-const storeEventToDB = storeEvent(prisma)
+const prisma = new PrismaClient();
+const storeEventToDB = storeEvent(prisma);
 
-const eventTypes = ["todoCreated", "todoCompleted", "todoTitleUpdated"] as const 
-eventTypes.forEach(type => {
+const eventTypes = [
+  "todoCreated",
+  "todoCompleted",
+  "todoTitleUpdated",
+] as const;
+eventTypes.forEach((type) => {
   subscribeEvent(type, (e) => {
-    const result = storeEventToDB(e)
+    const result = storeEventToDB(e);
     result.match(
       () => console.log("Success"),
-      (e) => console.log("Error:", e)
-    )
-  })
-})
+      (e) => console.log("Error:", e),
+    );
+  });
+});
 
 const fastify = Fastify({
-  logger: true
-})
+  logger: true,
+});
 
-fastify.get('/todos/:id', async (request, reply) => {
+fastify.get("/todos/:id", async (request, reply) => {
   const { id } = request.params as { id: string };
-  const res = await TodoId(id).asyncAndThen(getTodo(prisma))
-  if(res.isOk()) return res.value
-  return reply.status(400).send({ error: res.error.message })
+  const res = await TodoId(id).asyncAndThen(getTodo(prisma));
+  if (res.isOk()) return res.value;
+  return reply.status(400).send({ error: res.error.message });
 });
 
-fastify.get('/todos', async (_, reply) => {
-  const res = await getAllTodos(prisma)()
-  if(res.isOk()) return res.value
-  return reply.status(500).send({ error: res.error.message })
+fastify.get("/todos", async (_, reply) => {
+  const res = await getAllTodos(prisma)();
+  if (res.isOk()) return res.value;
+  return reply.status(500).send({ error: res.error.message });
 });
 
-fastify.patch('/todos/:id/complete', async (request, reply) => {
+fastify.patch("/todos/:id/complete", async (request, reply) => {
   const { id } = request.params as { id: string };
   const workflow = completeTodoWorkflow({
     getTodo: getTodo(prisma),
     pubishEvent: publishEvent,
-  })
+  });
   const res = await workflow({
     id,
-  })
+  });
 
-  if(res.isOk()) return reply.status(200).send()
-  return reply.status(500).send({ error: res.error.message })
+  if (res.isOk()) return reply.status(200).send();
+  return reply.status(500).send({ error: res.error.message });
 });
 
-fastify.patch('/todos/:id/title', async (request, reply) => {
-  const command = request.body as TodoChangeTitleCommand
+fastify.patch("/todos/:id/title", async (request, reply) => {
+  const command = request.body as TodoChangeTitleCommand;
 
   const workflow = changeTodoTitleWorkflow({
     getTodo: getTodo(prisma),
     pubishEvent: publishEvent,
-  })
-  const res = await workflow(command)
+  });
+  const res = await workflow(command);
 
-  if(res.isOk()) return reply.status(200).send()
-  return reply.status(500).send({ error: res.error.message })
+  if (res.isOk()) return reply.status(200).send();
+  return reply.status(500).send({ error: res.error.message });
 });
 
-fastify.post('/todos', async (req, reply) => {
-  const body = req.body as CreateTodoCommand
+fastify.post("/todos", async (req, reply) => {
+  const body = req.body as CreateTodoCommand;
 
   const workflow = createTodoWorkflow({
     pubishEvent: publishEvent,
     getTodo: getTodo(prisma),
-  })
-  const result = await workflow(body)
+  });
+  const result = await workflow(body);
 
-  if(result.isOk()) return reply.status(201).send()
-  return reply.status(500).send({ error: result.error.message })
+  if (result.isOk()) return reply.status(201).send();
+  return reply.status(500).send({ error: result.error.message });
 });
 
 fastify.listen({ port: 3000 }, (err, address) => {

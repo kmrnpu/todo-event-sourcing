@@ -2,25 +2,36 @@ import { z } from "zod";
 import { domainEvent } from "../../events/schema";
 import { todoDescription, todoId, todoTitle } from "../models/common";
 
-export const [todoCreatedEvent, TodoCreatedEvent] = domainEvent("todoCreated", z.object({
-  id: todoId,
-  title: todoTitle,
-  description: todoDescription,
-}))
+export const [todoCreatedEvent, TodoCreatedEvent] = domainEvent(
+  "todoCreated",
+  z.object({
+    id: todoId,
+    title: todoTitle,
+    description: todoDescription,
+  }),
+);
 
+export type TodoCreatedEvent = z.infer<typeof todoCreatedEvent>;
 
-export type TodoCreatedEvent = z.infer<typeof todoCreatedEvent>
+export const [todoTitleUpdatedEvent, TodoTitleUpdatedEvent] = domainEvent(
+  "todoTitleUpdated",
+  z.object({
+    id: todoId,
+    title: todoTitle,
+  }),
+);
+export type TodoTitleUpdatedEvent = z.infer<typeof todoTitleUpdatedEvent>;
 
-export const [todoTitleUpdatedEvent, TodoTitleUpdatedEvent] = domainEvent("todoTitleUpdated", z.object({
-  id: todoId,
-  title: todoTitle,
-}))
-export type TodoTitleUpdatedEvent = z.infer<typeof todoTitleUpdatedEvent>
+export const [todoCompletedEvent, TodoCompletedEvent] = domainEvent(
+  "todoCompleted",
+  z.object({
+    id: todoId,
+  }),
+);
 
-export const [todoCompletedEvent, TodoCompletedEvent] = domainEvent("todoCompleted", z.object({
-  id: todoId,
-}))
+export type TodoCompletedEvent = z.infer<typeof todoCompletedEvent>;
 
-export type TodoCompletedEvent = z.infer<typeof todoCompletedEvent>
-
-export type TodoDomainEvent = TodoCreatedEvent | TodoCompletedEvent | TodoTitleUpdatedEvent
+export type TodoDomainEvent =
+  | TodoCreatedEvent
+  | TodoCompletedEvent
+  | TodoTitleUpdatedEvent;

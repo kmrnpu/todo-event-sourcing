@@ -1,14 +1,14 @@
-import { z, ZodTypeAny } from 'zod';
-import { branded, parseWithResult } from '../utility/schema.js';
+import { z, ZodTypeAny } from "zod";
+import { branded, parseWithResult } from "../utility/schema.js";
 
-const [domainEventId] = branded("DomainEventId", z.string())
+const [domainEventId] = branded("DomainEventId", z.string());
 
 export const createDomainEventSchema = <
   Type extends string,
-  Payload extends ZodTypeAny
+  Payload extends ZodTypeAny,
 >(
   type: Type,
-  payload: Payload
+  payload: Payload,
 ) =>
   z.object({
     type: z.literal(type),
@@ -17,14 +17,10 @@ export const createDomainEventSchema = <
     occuredAt: z.date(),
   });
 
-
-export const domainEvent = <
-  Type extends string,
-  Payload extends ZodTypeAny
->(
+export const domainEvent = <Type extends string, Payload extends ZodTypeAny>(
   type: Type,
-  payload: Payload
+  payload: Payload,
 ) => {
-  const schema = createDomainEventSchema(type, payload)
-  return [schema, parseWithResult(schema)] as const
-}
+  const schema = createDomainEventSchema(type, payload);
+  return [schema, parseWithResult(schema)] as const;
+};

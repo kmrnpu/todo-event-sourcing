@@ -9,14 +9,16 @@ import { checkDuplication } from "./steps/checkDuplication";
 type Context = {
   pubishEvent: PublishEvent;
   getTodo: GetTodo;
-}
+};
 
-export const createTodoWorkflow = (ctx: Context): CreateTodoWorkflow => (command) =>
-  ok(command)
-  .andThen(createTodo)
-  .asyncAndThen(checkDuplication(ctx.getTodo))
-  .andThen(establishEvent)
-  .andThen(({event}) => {
-    ctx.pubishEvent(event)
-    return ok()
-  })
+export const createTodoWorkflow =
+  (ctx: Context): CreateTodoWorkflow =>
+  (command) =>
+    ok(command)
+      .andThen(createTodo)
+      .asyncAndThen(checkDuplication(ctx.getTodo))
+      .andThen(establishEvent)
+      .andThen(({ event }) => {
+        ctx.pubishEvent(event);
+        return ok();
+      });

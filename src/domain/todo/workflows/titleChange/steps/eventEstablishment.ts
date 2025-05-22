@@ -11,8 +11,8 @@ export const establishEvent: EstablishEvent = (command) =>
       title: command.todo.title,
     },
     occuredAt: new Date(),
-  }).map(event => ({
+  }).map((event) => ({
     state: "eventEstablished",
     todo: command.todo,
     event,
-  }))
+  }));
