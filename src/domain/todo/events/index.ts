@@ -8,7 +8,14 @@ export const [todoCreatedEvent, TodoCreatedEvent] = domainEvent("todoCreated", z
   description: todoDescription,
 }))
 
+
 export type TodoCreatedEvent = z.infer<typeof todoCreatedEvent>
+
+export const [todoTitleUpdatedEvent, TodoTitleUpdatedEvent] = domainEvent("todoTitleUpdated", z.object({
+  id: todoId,
+  title: todoTitle,
+}))
+export type TodoTitleUpdatedEvent = z.infer<typeof todoTitleUpdatedEvent>
 
 export const [todoCompletedEvent, TodoCompletedEvent] = domainEvent("todoCompleted", z.object({
   id: todoId,
@@ -16,4 +23,4 @@ export const [todoCompletedEvent, TodoCompletedEvent] = domainEvent("todoComplet
 
 export type TodoCompletedEvent = z.infer<typeof todoCompletedEvent>
 
-export type TodoDomainEvent = TodoCreatedEvent | TodoCompletedEvent
+export type TodoDomainEvent = TodoCreatedEvent | TodoCompletedEvent | TodoTitleUpdatedEvent

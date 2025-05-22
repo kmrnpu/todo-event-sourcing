@@ -1,5 +1,5 @@
 import { ok, safeTry } from "neverthrow"
-import { TodoCreatedEvent, TodoCompletedEvent, TodoDomainEvent } from "../domain/todo/events"
+import { TodoCreatedEvent, TodoCompletedEvent, TodoDomainEvent, TodoTitleUpdatedEvent } from "../domain/todo/events"
 import { TodoId } from "../domain/todo/models/common"
 import { Todo } from "../domain/todo/models/entity"
 import {match} from "ts-pattern"
@@ -8,7 +8,7 @@ import { GetAllTodos, GetTodo } from "../domain/todo/repos/types"
 
 type EventMap = Map<TodoId, Todo>
 
-const handleCreatedEvent = (eventMap: EventMap) => (e: TodoCreatedEvent): EventMap => {
+const handleCreated = (eventMap: EventMap) => (e: TodoCreatedEvent): EventMap => {
   const id = e.payload.id
   if(eventMap.get(id)) return eventMap
     const todo = Todo({
@@ -24,7 +24,7 @@ const handleCreatedEvent = (eventMap: EventMap) => (e: TodoCreatedEvent): EventM
   return eventMap
 }
 
-const handleCompletedEvent = (eventMap: EventMap) => (e: TodoCompletedEvent): EventMap => {
+const handleCompleted = (eventMap: EventMap) => (e: TodoCompletedEvent): EventMap => {
   const id = e.payload.id
   const todo = eventMap.get(id)
   if(!todo) return eventMap
@@ -36,17 +36,29 @@ const handleCompletedEvent = (eventMap: EventMap) => (e: TodoCompletedEvent): Ev
   return eventMap
 }
 
+const handleTitleUpdated = (eventMap: EventMap) => (e: TodoTitleUpdatedEvent): EventMap => {
+  const id = e.payload.id
+  const todo = eventMap.get(id)
+  if(!todo) return eventMap
+  eventMap.set(id, {
+    ...todo,
+    title: e.payload.title,
+  })
+  return eventMap
+}
+
 const reducer = (eventMap: EventMap, event: TodoDomainEvent): EventMap => 
   match(event)
-    .with({type: "todoCreated"}, handleCreatedEvent(eventMap))
-    .with({type: "todoCompleted"}, handleCompletedEvent(eventMap))
+    .with({type: "todoCreated"}, handleCreated(eventMap))
+    .with({type: "todoCompleted"}, handleCompleted(eventMap))
+    .with({type: "todoTitleUpdated"}, handleTitleUpdated(eventMap))
   .exhaustive()
 
 export const getTodo = (prisma: PrismaClient): GetTodo => (id) => safeTry(async function*() {
   const res = await prisma.event.findMany({
     where: {
       type: {
-        in: ["todoCreated", "todoCompleted"],
+        in: ["todoCreated", "todoCompleted", "todoTitleUpdated"],
       },
       payload: {
         path: ['id'],
@@ -68,7 +80,7 @@ export const getAllTodos = (prisma: PrismaClient): GetAllTodos => () => safeTry(
   const res = await prisma.event.findMany({
     where: {
       type: {
-        in: ["todoCreated", "todoCompleted"],
+        in: ["todoCreated", "todoCompleted", "todoTitleUpdated"],
       },
     },
     orderBy: [

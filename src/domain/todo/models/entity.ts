@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { todoDescription, todoId, todoTitle } from "./common";
+import { todoDescription, todoId, TodoTitle, todoTitle } from "./common";
 import { parseWithResult } from "../../utility/schema";
 
 export const todoUncompleted = z.object({
@@ -43,3 +43,7 @@ export const uncompleteTodo = (todo: TodoCompleted): TodoUncompleted => ({
 })
 
 export const isCompleted = (todo: Todo) => todo.completed
+export const changeTodoTitle = (todo: Todo, title: TodoTitle) => ({
+  ...todo,
+  title,
+})

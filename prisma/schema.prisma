@@ -10,6 +10,7 @@ datasource db {
 enum EventType {
   todoCreated
   todoCompleted
+  todoTitleUpdated
 }
 
 model Event {

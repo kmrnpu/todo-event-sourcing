@@ -5,24 +5,33 @@ import { createTodoWorkflow } from "./domain/todo/workflows/creation";
 import { publishEvent, subscribeEvent } from "./domain/events/index"
 import { storeEvent } from "./infrastructures/prismaEventStore.ts"
 import { completeTodoWorkflow } from "./domain/todo/workflows/completion/index.ts";
+import { changeTodoTitleWorkflow } from "./domain/todo/workflows/titleChange/index.ts";
 
 const prisma = new PrismaClient()
 const storeEventToDB = storeEvent(prisma)
 
-subscribeEvent("todoCreated",(e) => {
-  const result = storeEventToDB(e)
-  result.match(
-    () => console.log("Success"),
-    (e) => console.log("Error:", e)
-  )
+const eventTypes = ["todoCreated", "todoCompleted", "todoTitleUpdated"] as const 
+eventTypes.forEach(type => {
+  subscribeEvent(type, (e) => {
+    const result = storeEventToDB(e)
+    result.match(
+      () => console.log("Success"),
+      (e) => console.log("Error:", e)
+    )
+  })
 })
-subscribeEvent("todoCompleted",(e) => {
-  const result = storeEventToDB(e)
-  result.match(
-    () => console.log("Success"),
-    (e) => console.log("Error:", e)
-  )
-})
+
+// const changeTodoTitle = changeTodoTitleWorkflow({
+//   getTodo: getTodo(prisma),
+//   pubishEvent: publishEvent,
+// })
+// changeTodoTitle({
+//   id: "c3fba319-6173-4005-adaa-aa7d68367829",
+//   title: "a",
+// }).match(
+//   () => {},
+//   (e) => console.log(e),
+// )
 
 // const completeTodo = completeTodoWorkflow({
 //   getTodo: getTodo(prisma),
