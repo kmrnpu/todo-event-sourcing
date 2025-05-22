@@ -1,5 +1,5 @@
 {
-  "name": "todo",
+  "name": "todo-event-sourcing",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
