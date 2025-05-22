@@ -11,6 +11,7 @@ export const todoUncompleted = z.object({
   completed: z.literal(false),
   createdAt: z.date(),
   completedAt: z.null(),
+  updatedAt: z.date().nullable(),
 });
 
 export type TodoUncompleted = z.infer<typeof todoUncompleted>;
@@ -23,6 +24,7 @@ export const todoCompleted = z.object({
   completed: z.literal(true),
   createdAt: z.date(),
   completedAt: z.date(),
+  updatedAt: z.date().nullable(),
 });
 export type TodoCompleted = z.infer<typeof todoCompleted>;
 export const TodoCompleted = parseWithResult(todoCompleted);
@@ -48,7 +50,8 @@ export const uncompleteTodo = (todo: TodoCompleted): TodoUncompleted => ({
 });
 
 export const isCompleted = (todo: Todo) => todo.completed;
-export const changeTodoTitle = (todo: Todo, title: TodoTitle) => ({
+export const changeTodoTitle = (todo: Todo, title: TodoTitle, updatedAt: Date=new Date()) => ({
   ...todo,
   title,
+  updatedAt,
 });

@@ -10,6 +10,7 @@ export const createTodo: CreateTodo = (command) =>
     completed: false,
     createdAt: new Date(),
     completedAt: null,
+    updatedAt: null,
   }).map((todo) => ({
     state: "created",
     todo,

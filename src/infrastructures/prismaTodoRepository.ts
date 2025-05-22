@@ -29,6 +29,7 @@ const handleCreated =
       completed: false,
       createdAt: e.occuredAt,
       completedAt: null,
+      updatedAt: null,
     });
     if (todo.isErr()) return eventMap;
     eventMap.set(id, todo.value);
@@ -51,7 +52,7 @@ const handleTitleUpdated =
     const id = e.payload.id;
     const todo = eventMap.get(id);
     if (!todo) return eventMap;
-    eventMap.set(id, changeTodoTitle(todo, e.payload.title));
+    eventMap.set(id, changeTodoTitle(todo, e.payload.title, e.occuredAt));
     return eventMap;
   };
 

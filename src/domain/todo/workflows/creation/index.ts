@@ -1,5 +1,5 @@
 import { ok } from "neverthrow";
-import { CreateTodoWorkflow } from "./schema";
+import { CreateTodoWorkflow } from "./types";
 import { createTodo } from "./steps/creation";
 import { establishEvent } from "./steps/eventEstablishment";
 import { PublishEvent } from "../../../events";
