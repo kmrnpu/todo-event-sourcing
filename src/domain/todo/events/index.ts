@@ -10,7 +10,6 @@ export const [todoCreatedEvent, TodoCreatedEvent] = domainEvent(
     description: todoDescription,
   }),
 );
-
 export type TodoCreatedEvent = z.infer<typeof todoCreatedEvent>;
 
 export const [todoTitleUpdatedEvent, TodoTitleUpdatedEvent] = domainEvent(
@@ -28,7 +27,6 @@ export const [todoCompletedEvent, TodoCompletedEvent] = domainEvent(
     id: todoId,
   }),
 );
-
 export type TodoCompletedEvent = z.infer<typeof todoCompletedEvent>;
 
 export type TodoDomainEvent =
