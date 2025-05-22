@@ -1,5 +1,5 @@
 import Fastify from 'fastify'
-import { CreateTodoCommand } from "./domain/todo/workflows/creation/schema";
+import { CreateTodoCommand } from "./domain/todo/workflows/creation/types";
 import { TodoChangeTitleCommand } from "./domain/todo/workflows/titleChange/types";
 import { PrismaClient } from "@prisma/client";
 import { getAllTodos, getTodo } from "./infrastructures/prismaTodoRepository";

@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { TodoUncompleted } from "../../../models/entity";
-import { CreateTodo } from "../schema";
+import { CreateTodo } from "../types";
 
 export const createTodo: CreateTodo = (command) => TodoUncompleted({
   id: randomUUID(),

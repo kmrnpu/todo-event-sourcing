@@ -1,6 +1,6 @@
 import { err, ok } from "neverthrow";
 import { GetTodo } from "../../../repos/types";
-import { CheckDuplication } from "../schema";
+import { CheckDuplication } from "../types";
 
 export const checkDuplication = (getTodoById: GetTodo): CheckDuplication => (command) =>
   getTodoById(command.todo.id)

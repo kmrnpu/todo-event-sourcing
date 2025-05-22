@@ -1,3 +1,5 @@
+/** @todo Add updatedAt propertiy to models. */
+
 import { z } from "zod";
 import { todoDescription, todoId, TodoTitle, todoTitle } from "./common";
 import { parseWithResult } from "../../utility/schema";
@@ -30,10 +32,10 @@ const todo = z.union([todoUncompleted, todoCompleted])
 export const Todo = parseWithResult(todo)
 export type Todo = z.infer<typeof todo>
 
-export const completeTodo = (todo: TodoUncompleted): TodoCompleted => ({
+export const completeTodo = (todo: TodoUncompleted, completedAt: Date = new Date()): TodoCompleted => ({
   ...todo,
   completed: true,
-  completedAt: new Date(),
+  completedAt,
 })
 
 export const uncompleteTodo = (todo: TodoCompleted): TodoUncompleted => ({

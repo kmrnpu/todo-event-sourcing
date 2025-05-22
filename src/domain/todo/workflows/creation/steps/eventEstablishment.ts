@@ -1,5 +1,5 @@
 import { ok, safeTry } from "neverthrow";
-import { EstablishEvent } from "../schema";
+import { EstablishEvent } from "../types";
 import { TodoCreatedEvent } from "../../../events";
 import { randomUUID } from "crypto";
 

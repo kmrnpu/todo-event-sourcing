@@ -1,7 +1,7 @@
 import { ok, safeTry } from "neverthrow"
 import { TodoCreatedEvent, TodoCompletedEvent, TodoDomainEvent, TodoTitleUpdatedEvent } from "../domain/todo/events"
 import { TodoId } from "../domain/todo/models/common"
-import { Todo } from "../domain/todo/models/entity"
+import { changeTodoTitle, completeTodo, Todo } from "../domain/todo/models/entity"
 import {match} from "ts-pattern"
 import { PrismaClient } from "@prisma/client"
 import { GetAllTodos, GetTodo } from "../domain/todo/repos/types"
@@ -27,12 +27,8 @@ const handleCreated = (eventMap: EventMap) => (e: TodoCreatedEvent): EventMap =>
 const handleCompleted = (eventMap: EventMap) => (e: TodoCompletedEvent): EventMap => {
   const id = e.payload.id
   const todo = eventMap.get(id)
-  if(!todo) return eventMap
-  eventMap.set(id, {
-    ...todo,
-    completed: true,
-    completedAt: e.occuredAt,
-  })
+  if(!todo || todo.completed) return eventMap
+  eventMap.set(id, completeTodo(todo, e.occuredAt))
   return eventMap
 }
 
@@ -40,10 +36,7 @@ const handleTitleUpdated = (eventMap: EventMap) => (e: TodoTitleUpdatedEvent): E
   const id = e.payload.id
   const todo = eventMap.get(id)
   if(!todo) return eventMap
-  eventMap.set(id, {
-    ...todo,
-    title: e.payload.title,
-  })
+  eventMap.set(id, changeTodoTitle(todo, e.payload.title))
   return eventMap
 }
 
@@ -93,5 +86,3 @@ export const getAllTodos = (prisma: PrismaClient): GetAllTodos => () => safeTry(
   const todo =  res.reduce(reducer, new Map() as EventMap)
   return ok(Array.from(todo.values()))
 })
-
-
