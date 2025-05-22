@@ -1,11 +1,14 @@
+import Fastify from 'fastify'
+import { CreateTodoCommand } from "./domain/todo/workflows/creation/schema";
+import { TodoChangeTitleCommand } from "./domain/todo/workflows/titleChange/types";
 import { PrismaClient } from "@prisma/client";
 import { getAllTodos, getTodo } from "./infrastructures/prismaTodoRepository";
 import { TodoId } from "./domain/todo/models/common";
 import { createTodoWorkflow } from "./domain/todo/workflows/creation";
 import { publishEvent, subscribeEvent } from "./domain/events/index"
-import { storeEvent } from "./infrastructures/prismaEventStore.ts"
-import { completeTodoWorkflow } from "./domain/todo/workflows/completion/index.ts";
-import { changeTodoTitleWorkflow } from "./domain/todo/workflows/titleChange/index.ts";
+import { storeEvent } from "./infrastructures/prismaEventStore"
+import { completeTodoWorkflow } from "./domain/todo/workflows/completion/index";
+import { changeTodoTitleWorkflow } from "./domain/todo/workflows/titleChange/index";
 
 const prisma = new PrismaClient()
 const storeEventToDB = storeEvent(prisma)
@@ -21,52 +24,67 @@ eventTypes.forEach(type => {
   })
 })
 
-// const changeTodoTitle = changeTodoTitleWorkflow({
-//   getTodo: getTodo(prisma),
-//   pubishEvent: publishEvent,
-// })
-// changeTodoTitle({
-//   id: "c3fba319-6173-4005-adaa-aa7d68367829",
-//   title: "a",
-// }).match(
-//   () => {},
-//   (e) => console.log(e),
-// )
+const fastify = Fastify({
+  logger: true
+})
 
-// const completeTodo = completeTodoWorkflow({
-//   getTodo: getTodo(prisma),
-//   pubishEvent: publishEvent,
-// })
+fastify.get('/todos/:id', async (request, reply) => {
+  const { id } = request.params as { id: string };
+  const res = await TodoId(id).asyncAndThen(getTodo(prisma))
+  if(res.isOk()) return res.value
+  return reply.status(400).send({ error: res.error.message })
+});
 
-// completeTodo({
-//   id: "c3fba319-6173-4005-adaa-aa7d68367829",
-// }).match(
-//   () => {},
-//   (e) => console.log(e),
-// )
+fastify.get('/todos', async (_, reply) => {
+  const res = await getAllTodos(prisma)()
+  if(res.isOk()) return res.value
+  return reply.status(500).send({ error: res.error.message })
+});
 
-// const workflow = createTodoWorkflow({
-//   pubishEvent: publishEvent,
-//   getTodo: getTodo(prisma),
-// })
-//
-// const result = workflow({
-//   title: "寝る",
-//   description: "8時間寝る",
-// })
-//
-// result.match(
-//   () => {},
-//   (e) => console.log(e),
-// )
+fastify.patch('/todos/:id/complete', async (request, reply) => {
+  const { id } = request.params as { id: string };
+  const workflow = completeTodoWorkflow({
+    getTodo: getTodo(prisma),
+    pubishEvent: publishEvent,
+  })
+  const res = await workflow({
+    id,
+  })
 
+  if(res.isOk()) return reply.status(200).send()
+  return reply.status(500).send({ error: res.error.message })
+});
 
-getTodo(new PrismaClient())("0b19200e-8618-40e0-9828-c656a82c7b9b" as TodoId).match(
-  (a) => console.log(a),
-  (b) => console.log(b),
-)
+fastify.patch('/todos/:id/title', async (request, reply) => {
+  const command = request.body as TodoChangeTitleCommand
 
-getAllTodos(new PrismaClient())().match(
-  (a) => console.log(a),
-  (b) => console.log(b),
-)
+  const workflow = changeTodoTitleWorkflow({
+    getTodo: getTodo(prisma),
+    pubishEvent: publishEvent,
+  })
+  const res = await workflow(command)
+
+  if(res.isOk()) return reply.status(200).send()
+  return reply.status(500).send({ error: res.error.message })
+});
+
+fastify.post('/todos', async (req, reply) => {
+  const body = req.body as CreateTodoCommand
+
+  const workflow = createTodoWorkflow({
+    pubishEvent: publishEvent,
+    getTodo: getTodo(prisma),
+  })
+  const result = await workflow(body)
+
+  if(result.isOk()) return reply.status(201).send()
+  return reply.status(500).send({ error: result.error.message })
+});
+
+fastify.listen({ port: 3000 }, (err, address) => {
+  if (err) {
+    fastify.log.error(err);
+    process.exit(1);
+  }
+  fastify.log.info(`Server listening at ${address}`);
+});
