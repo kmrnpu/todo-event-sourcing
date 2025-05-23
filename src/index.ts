@@ -2,7 +2,7 @@ import Fastify from "fastify";
 import { CreateTodoCommand } from "./domain/todo/workflows/creation/types";
 import { TodoChangeTitleCommand } from "./domain/todo/workflows/titleChange/types";
 import { PrismaClient } from "@prisma/client";
-import { getAllTodos, getTodo } from "./infrastructures/prismaTodoRepository";
+import { getAllTodos, getTodo, getTodoHistory } from "./infrastructures/prismaTodoRepository";
 import { TodoId } from "./domain/todo/models/common";
 import { createTodoWorkflow } from "./domain/todo/workflows/creation";
 import { publishEvent } from "./domain/events/index";
@@ -20,6 +20,13 @@ const fastify = Fastify({
 fastify.get("/todos/:id", async (request, reply) => {
   const { id } = request.params as { id: string };
   const res = await TodoId(id).asyncAndThen(getTodo(prisma));
+  if (res.isOk()) return res.value;
+  return reply.status(400).send({ error: res.error.message });
+});
+
+fastify.get("/todos/:id/history", async (request, reply) => {
+  const { id } = request.params as { id: string };
+  const res = await TodoId(id).asyncAndThen(getTodoHistory(prisma));
   if (res.isOk()) return res.value;
   return reply.status(400).send({ error: res.error.message });
 });

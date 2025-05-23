@@ -1,4 +1,4 @@
-import { ok, safeTry } from "neverthrow";
+import { err, ok, safeTry } from "neverthrow";
 import {
   TodoCreatedEvent,
   TodoCompletedEvent,
@@ -13,7 +13,7 @@ import {
 } from "../domain/todo/models/entity";
 import { match } from "ts-pattern";
 import { PrismaClient } from "@prisma/client";
-import { GetAllTodos, GetTodo } from "../domain/todo/repos/types";
+import { GetAllTodos, GetTodo, GetTodoHistory } from "../domain/todo/repos/types";
 
 type EventMap = Map<TodoId, Todo>;
 
@@ -106,4 +106,33 @@ export const getAllTodos =
 
       const todo = res.reduce(reducer, new Map() as EventMap);
       return ok(Array.from(todo.values()));
+    });
+
+export const getTodoHistory = 
+  (prisma: PrismaClient): GetTodoHistory =>
+  (id) =>
+    safeTry(async function* () {
+      try {
+        const res = (await prisma.event.findMany({
+          where: {
+            type: {
+              in: ["todoCreated", "todoCompleted", "todoTitleUpdated"],
+            },
+            payload: {
+              path: ["id"],
+              equals: id,
+            },
+          },
+          orderBy: [
+            {
+              occuredAt: "asc",
+            },
+          ],
+        })) as TodoDomainEvent[];
+
+        return ok(res)
+
+      } catch(e) {
+        return err(e as Error)
+      }
     });
