@@ -1,15 +1,14 @@
 import { ok } from "neverthrow";
-import { PublishEvent } from "../../../events";
 import { GetTodo } from "../../repos/types";
 import { ChangeTodoTitleWorkflow } from "./types";
 import { validate } from "./steps/validation";
 import { identifyTarget } from "./steps/targetIdentification";
 import { changeTitle } from "./steps/titleChange";
-import { establishEvent } from "./steps/eventEstablishment";
+import { StoreEvent } from "../../../events/repos/types";
 
 type Context = {
   getTodo: GetTodo;
-  pubishEvent: PublishEvent;
+  storeEvent: StoreEvent;
 };
 
 export const changeTodoTitleWorkflow =
@@ -19,8 +18,6 @@ export const changeTodoTitleWorkflow =
       .andThen(validate)
       .asyncAndThen(identifyTarget(ctx.getTodo))
       .andThen(changeTitle)
-      .andThen(establishEvent)
       .andThen(({ event }) => {
-        ctx.pubishEvent(event);
-        return ok();
+        return ctx.storeEvent(event);
       });

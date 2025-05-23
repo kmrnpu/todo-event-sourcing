@@ -42,7 +42,7 @@ const handleCompleted =
     const id = e.payload.id;
     const todo = eventMap.get(id);
     if (!todo || todo.completed) return eventMap;
-    eventMap.set(id, completeTodo(todo, e.occuredAt));
+    eventMap.set(id, completeTodo(todo, e.occuredAt).entity);
     return eventMap;
   };
 
@@ -52,7 +52,7 @@ const handleTitleUpdated =
     const id = e.payload.id;
     const todo = eventMap.get(id);
     if (!todo) return eventMap;
-    eventMap.set(id, changeTodoTitle(todo, e.payload.title, e.occuredAt));
+    eventMap.set(id, changeTodoTitle(todo, e.payload.title, e.occuredAt).entity);
     return eventMap;
   };
 

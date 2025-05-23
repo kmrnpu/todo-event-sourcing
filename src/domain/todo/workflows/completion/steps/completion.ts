@@ -7,6 +7,7 @@ export const complete: Complete = (command) =>
     const todo = completeTodo(command.todo);
     return ok({
       state: "completed" as const,
-      todo: todo,
+      todo: todo.entity,
+      event: todo.event,
     });
   });

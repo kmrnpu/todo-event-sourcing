@@ -6,6 +6,7 @@ export const changeTitle: ChangeTitle = (command) => {
   const titleChanged = changeTodoTitle(command.todo, command.title);
   return ok({
     state: "titleChanged",
-    todo: titleChanged,
+    todo: titleChanged.entity,
+    event: titleChanged.event,
   });
 };

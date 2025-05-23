@@ -5,28 +5,13 @@ import { PrismaClient } from "@prisma/client";
 import { getAllTodos, getTodo } from "./infrastructures/prismaTodoRepository";
 import { TodoId } from "./domain/todo/models/common";
 import { createTodoWorkflow } from "./domain/todo/workflows/creation";
-import { publishEvent, subscribeEvent } from "./domain/events/index";
+import { publishEvent } from "./domain/events/index";
 import { storeEvent } from "./infrastructures/prismaEventStore";
 import { completeTodoWorkflow } from "./domain/todo/workflows/completion/index";
 import { changeTodoTitleWorkflow } from "./domain/todo/workflows/titleChange/index";
 
 const prisma = new PrismaClient();
-const storeEventToDB = storeEvent(prisma);
-
-const eventTypes = [
-  "todoCreated",
-  "todoCompleted",
-  "todoTitleUpdated",
-] as const;
-eventTypes.forEach((type) => {
-  subscribeEvent(type, (e) => {
-    const result = storeEventToDB(e);
-    result.match(
-      () => console.log("Success"),
-      (e) => console.log("Error:", e),
-    );
-  });
-});
+const storeEventToDB = storeEvent({prisma, publishEvent});
 
 const fastify = Fastify({
   logger: true,
@@ -49,7 +34,7 @@ fastify.patch("/todos/:id/complete", async (request, reply) => {
   const { id } = request.params as { id: string };
   const workflow = completeTodoWorkflow({
     getTodo: getTodo(prisma),
-    pubishEvent: publishEvent,
+    storeEvent: storeEventToDB,
   });
   const res = await workflow({
     id,
@@ -64,7 +49,7 @@ fastify.patch("/todos/:id/title", async (request, reply) => {
 
   const workflow = changeTodoTitleWorkflow({
     getTodo: getTodo(prisma),
-    pubishEvent: publishEvent,
+    storeEvent: storeEventToDB,
   });
   const res = await workflow(command);
 
@@ -76,7 +61,7 @@ fastify.post("/todos", async (req, reply) => {
   const body = req.body as CreateTodoCommand;
 
   const workflow = createTodoWorkflow({
-    pubishEvent: publishEvent,
+    storeEvent: storeEventToDB,
     getTodo: getTodo(prisma),
   });
   const result = await workflow(body);

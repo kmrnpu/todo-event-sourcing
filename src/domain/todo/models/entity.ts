@@ -3,6 +3,8 @@
 import { z } from "zod";
 import { todoDescription, todoId, TodoTitle, todoTitle } from "./common";
 import { parseWithResult } from "../../utility/schema";
+import { TodoCompletedEvent, TodoTitleUpdatedEvent } from "../events";
+import { DomainEventId } from "../../events/schema";
 
 export const todoUncompleted = z.object({
   id: todoId,
@@ -34,14 +36,33 @@ const todo = z.union([todoUncompleted, todoCompleted]);
 export const Todo = parseWithResult(todo);
 export type Todo = z.infer<typeof todo>;
 
-export const completeTodo = (
+const complete = (
   todo: TodoUncompleted,
   completedAt: Date = new Date(),
 ): TodoCompleted => ({
   ...todo,
   completed: true,
   completedAt,
-});
+})
+
+export const completeTodo = (
+  todo: TodoUncompleted,
+  completedAt: Date = new Date(),
+): {entity: TodoCompleted, event: TodoCompletedEvent} => {
+    const completed = complete(todo, completedAt)
+
+    return {
+      entity: completed,
+      event: {
+      type: "todoCompleted",
+      id: DomainEventId.create(),
+      payload: {
+        id: completed.id,
+      },
+      occuredAt: completedAt,
+      },
+    }
+  }
 
 export const uncompleteTodo = (todo: TodoCompleted): TodoUncompleted => ({
   ...todo,
@@ -50,8 +71,26 @@ export const uncompleteTodo = (todo: TodoCompleted): TodoUncompleted => ({
 });
 
 export const isCompleted = (todo: Todo) => todo.completed;
-export const changeTodoTitle = (todo: Todo, title: TodoTitle, updatedAt: Date=new Date()) => ({
+const changeTitle = (todo: Todo, title: TodoTitle, updatedAt: Date=new Date()) => ({
   ...todo,
   title,
   updatedAt,
 });
+
+export const changeTodoTitle = (todo: Todo, title: TodoTitle, updatedAt: Date=new Date()): {entity: Todo, event: TodoTitleUpdatedEvent} => {
+  const updated = changeTitle(todo, title, updatedAt)
+  return {
+    entity: updated,
+    event: {
+      id: DomainEventId.create(),
+      type: "todoTitleUpdated",
+      payload: {
+        id: updated.id,
+        title: updated.title,
+      },
+      occuredAt: updated.updatedAt,
+    }
+  }
+}
+
+

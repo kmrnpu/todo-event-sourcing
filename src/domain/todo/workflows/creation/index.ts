@@ -2,12 +2,12 @@ import { ok } from "neverthrow";
 import { CreateTodoWorkflow } from "./types";
 import { createTodo } from "./steps/creation";
 import { establishEvent } from "./steps/eventEstablishment";
-import { PublishEvent } from "../../../events";
 import { GetTodo } from "../../repos/types";
 import { checkDuplication } from "./steps/checkDuplication";
+import { StoreEvent } from "../../../events/repos/types";
 
 type Context = {
-  pubishEvent: PublishEvent;
+  storeEvent: StoreEvent;
   getTodo: GetTodo;
 };
 
@@ -19,6 +19,5 @@ export const createTodoWorkflow =
       .asyncAndThen(checkDuplication(ctx.getTodo))
       .andThen(establishEvent)
       .andThen(({ event }) => {
-        ctx.pubishEvent(event);
-        return ok();
+        return ctx.storeEvent(event);
       });
