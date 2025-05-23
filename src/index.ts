@@ -56,13 +56,17 @@ fastify.patch("/todos/:id/complete", async (request, reply) => {
 });
 
 fastify.patch("/todos/:id/title", async (request, reply) => {
-  const command = request.body as TodoChangeTitleCommand;
+  const command = request.body as Omit<TodoChangeTitleCommand, "id">;
+  const { id } = request.params as { id: string };
 
   const workflow = changeTodoTitleWorkflow({
     getTodo: getTodo(prisma),
     storeEvent: storeEventToDB,
   });
-  const res = await workflow(command);
+  const res = await workflow({
+    id,
+    ...command
+  });
 
   if (res.isOk()) return reply.status(200).send();
   return reply.status(500).send({ error: res.error.message });
