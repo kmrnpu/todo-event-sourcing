@@ -13,7 +13,11 @@ import {
 } from "../domain/todo/models/entity";
 import { match } from "ts-pattern";
 import { PrismaClient } from "@prisma/client";
-import { GetAllTodos, GetTodo, GetTodoHistory } from "../domain/todo/repos/types";
+import {
+  GetAllTodos,
+  GetTodo,
+  GetTodoHistory,
+} from "../domain/todo/repos/types";
 
 type EventMap = Map<TodoId, Todo>;
 
@@ -51,7 +55,10 @@ const handleTitleUpdated =
     const id = e.payload.id;
     const todo = eventMap.get(id);
     if (!todo) return eventMap;
-    eventMap.set(id, changeTodoTitle(todo, e.payload.title, e.occuredAt).entity);
+    eventMap.set(
+      id,
+      changeTodoTitle(todo, e.payload.title, e.occuredAt).entity,
+    );
     return eventMap;
   };
 
@@ -108,7 +115,7 @@ export const getAllTodos =
       return ok(Array.from(todo.values()));
     });
 
-export const getTodoHistory = 
+export const getTodoHistory =
   (prisma: PrismaClient): GetTodoHistory =>
   (id) =>
     safeTry(async function* () {
@@ -130,9 +137,8 @@ export const getTodoHistory =
           ],
         })) as TodoDomainEvent[];
 
-        return ok(res)
-
-      } catch(e) {
-        return err(e as Error)
+        return ok(res);
+      } catch (e) {
+        return err(e as Error);
       }
     });

@@ -2,7 +2,11 @@ import Fastify from "fastify";
 import { CreateTodoCommand } from "./domain/todo/workflows/creation/types";
 import { TodoChangeTitleCommand } from "./domain/todo/workflows/titleChange/types";
 import { PrismaClient } from "@prisma/client";
-import { getAllTodos, getTodo, getTodoHistory } from "./infrastructures/prismaTodoRepository";
+import {
+  getAllTodos,
+  getTodo,
+  getTodoHistory,
+} from "./infrastructures/prismaTodoRepository";
 import { TodoId } from "./domain/todo/models/common";
 import { createTodoWorkflow } from "./domain/todo/workflows/creation";
 import { publishEvent } from "./domain/events/index";
@@ -11,7 +15,7 @@ import { completeTodoWorkflow } from "./domain/todo/workflows/completion/index";
 import { changeTodoTitleWorkflow } from "./domain/todo/workflows/titleChange/index";
 
 const prisma = new PrismaClient();
-const storeEventToDB = storeEvent({prisma, publishEvent});
+const storeEventToDB = storeEvent({ prisma, publishEvent });
 
 const fastify = Fastify({
   logger: true,

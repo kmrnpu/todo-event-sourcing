@@ -40,26 +40,26 @@ const complete = (
 ): TodoCompleted => ({
   ...todo,
   completedAt,
-})
+});
 
 export const completeTodo = (
   todo: TodoUncompleted,
   completedAt: Date = new Date(),
-): {entity: TodoCompleted, event: TodoCompletedEvent} => {
-    const completed = complete(todo, completedAt)
+): { entity: TodoCompleted; event: TodoCompletedEvent } => {
+  const completed = complete(todo, completedAt);
 
-    return {
-      entity: completed,
-      event: {
+  return {
+    entity: completed,
+    event: {
       type: "todoCompleted",
       id: DomainEventId.create(),
       payload: {
         id: completed.id,
       },
       occuredAt: completedAt,
-      },
-    }
-  }
+    },
+  };
+};
 
 export const uncompleteTodo = (todo: TodoCompleted): TodoUncompleted => ({
   ...todo,
@@ -67,14 +67,22 @@ export const uncompleteTodo = (todo: TodoCompleted): TodoUncompleted => ({
 });
 
 export const isCompleted = (todo: Todo) => todo.completedAt !== null;
-const changeTitle = (todo: Todo, title: TodoTitle, updatedAt: Date=new Date()) => ({
+const changeTitle = (
+  todo: Todo,
+  title: TodoTitle,
+  updatedAt: Date = new Date(),
+) => ({
   ...todo,
   title,
   updatedAt,
 });
 
-export const changeTodoTitle = (todo: Todo, title: TodoTitle, updatedAt: Date=new Date()): {entity: Todo, event: TodoTitleUpdatedEvent} => {
-  const updated = changeTitle(todo, title, updatedAt)
+export const changeTodoTitle = (
+  todo: Todo,
+  title: TodoTitle,
+  updatedAt: Date = new Date(),
+): { entity: Todo; event: TodoTitleUpdatedEvent } => {
+  const updated = changeTitle(todo, title, updatedAt);
   return {
     entity: updated,
     event: {
@@ -85,8 +93,6 @@ export const changeTodoTitle = (todo: Todo, title: TodoTitle, updatedAt: Date=ne
         title: updated.title,
       },
       occuredAt: updated.updatedAt,
-    }
-  }
-}
-
-
+    },
+  };
+};

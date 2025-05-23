@@ -4,7 +4,7 @@ import { err, ok, safeTry } from "neverthrow";
 import { PublishEvent } from "../domain/events";
 
 export const storeEvent =
-  (ctx: {prisma: PrismaClient, publishEvent: PublishEvent}): StoreEvent =>
+  (ctx: { prisma: PrismaClient; publishEvent: PublishEvent }): StoreEvent =>
   (event) =>
     safeTry(async function* () {
       try {
@@ -16,7 +16,7 @@ export const storeEvent =
           },
         });
         console.log("Stored event: ", event);
-        ctx.publishEvent(event)
+        ctx.publishEvent(event);
         return ok();
       } catch (e) {
         return err(e as Error);

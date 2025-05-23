@@ -26,7 +26,6 @@ export type TitleChanged = {
   event: TodoTitleUpdatedEvent;
 };
 
-
 export type Validate = (
   command: TodoChangeTitleCommand,
 ) => Result<CommandValidated, Error>;
