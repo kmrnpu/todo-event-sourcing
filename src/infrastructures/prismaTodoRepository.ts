@@ -26,7 +26,6 @@ const handleCreated =
       id: e.payload.id,
       title: e.payload.title,
       description: e.payload.description,
-      completed: false,
       createdAt: e.occuredAt,
       completedAt: null,
       updatedAt: null,
@@ -41,7 +40,7 @@ const handleCompleted =
   (e: TodoCompletedEvent): EventMap => {
     const id = e.payload.id;
     const todo = eventMap.get(id);
-    if (!todo || todo.completed) return eventMap;
+    if (!todo || todo.completedAt) return eventMap;
     eventMap.set(id, completeTodo(todo, e.occuredAt).entity);
     return eventMap;
   };

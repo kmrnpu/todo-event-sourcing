@@ -7,7 +7,6 @@ export const createTodo: CreateTodo = (command) =>
     id: randomUUID(),
     title: command.title,
     description: command.description,
-    completed: false,
     createdAt: new Date(),
     completedAt: null,
     updatedAt: null,

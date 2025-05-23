@@ -10,7 +10,6 @@ export const todoUncompleted = z.object({
   id: todoId,
   title: todoTitle,
   description: todoDescription,
-  completed: z.literal(false),
   createdAt: z.date(),
   completedAt: z.null(),
   updatedAt: z.date().nullable(),
@@ -23,7 +22,6 @@ export const todoCompleted = z.object({
   id: todoId,
   title: todoTitle,
   description: todoDescription,
-  completed: z.literal(true),
   createdAt: z.date(),
   completedAt: z.date(),
   updatedAt: z.date().nullable(),
@@ -41,7 +39,6 @@ const complete = (
   completedAt: Date = new Date(),
 ): TodoCompleted => ({
   ...todo,
-  completed: true,
   completedAt,
 })
 
@@ -66,11 +63,10 @@ export const completeTodo = (
 
 export const uncompleteTodo = (todo: TodoCompleted): TodoUncompleted => ({
   ...todo,
-  completed: false,
   completedAt: null,
 });
 
-export const isCompleted = (todo: Todo) => todo.completed;
+export const isCompleted = (todo: Todo) => todo.completedAt !== null;
 const changeTitle = (todo: Todo, title: TodoTitle, updatedAt: Date=new Date()) => ({
   ...todo,
   title,
