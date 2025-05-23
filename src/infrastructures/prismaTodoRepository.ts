@@ -73,46 +73,54 @@ export const getTodo =
   (prisma: PrismaClient): GetTodo =>
   (id) =>
     safeTry(async function* () {
-      const res = (await prisma.event.findMany({
-        where: {
-          type: {
-            in: ["todoCreated", "todoCompleted", "todoTitleUpdated"],
+      try {
+        const res = (await prisma.event.findMany({
+          where: {
+            type: {
+              in: ["todoCreated", "todoCompleted", "todoTitleUpdated"],
+            },
+            payload: {
+              path: ["id"],
+              equals: id,
+            },
           },
-          payload: {
-            path: ["id"],
-            equals: id,
-          },
-        },
-        orderBy: [
-          {
-            occuredAt: "asc",
-          },
-        ],
-      })) as TodoDomainEvent[];
+          orderBy: [
+            {
+              occuredAt: "asc",
+            },
+          ],
+        })) as TodoDomainEvent[];
 
-      const todos = res.reduce(reducer, new Map() as EventMap);
-      return ok(todos.get(id) ?? null);
+        const todos = res.reduce(reducer, new Map() as EventMap);
+        return ok(todos.get(id) ?? null);
+      } catch (e) {
+        return err(e as Error);
+      }
     });
 
 export const getAllTodos =
   (prisma: PrismaClient): GetAllTodos =>
   () =>
     safeTry(async function* () {
-      const res = (await prisma.event.findMany({
-        where: {
-          type: {
-            in: ["todoCreated", "todoCompleted", "todoTitleUpdated"],
+      try {
+        const res = (await prisma.event.findMany({
+          where: {
+            type: {
+              in: ["todoCreated", "todoCompleted", "todoTitleUpdated"],
+            },
           },
-        },
-        orderBy: [
-          {
-            occuredAt: "asc",
-          },
-        ],
-      })) as TodoDomainEvent[];
+          orderBy: [
+            {
+              occuredAt: "asc",
+            },
+          ],
+        })) as TodoDomainEvent[];
 
-      const todo = res.reduce(reducer, new Map() as EventMap);
-      return ok(Array.from(todo.values()));
+        const todo = res.reduce(reducer, new Map() as EventMap);
+        return ok(Array.from(todo.values()));
+      } catch (e) {
+        return err(e as Error);
+      }
     });
 
 export const getTodoHistory =
@@ -136,7 +144,6 @@ export const getTodoHistory =
             },
           ],
         })) as TodoDomainEvent[];
-
         return ok(res);
       } catch (e) {
         return err(e as Error);
